@@ -47,7 +47,7 @@ def test_language_modeling(model, tokenizer, len=200, prompt=None, device='cuda'
     if torch.cuda.device_count() > 1 or multiGPU:
         greedy_output = model.module.generate(input_ids, pad_token_id=tokenizer.pad_token_id, max_length=len)
     else:
-        greedy_output = model.generate(input_ids, pad_token_id=tokenizer.pad_token_id, max_length=len)
+        greedy_output = model.generate(input_ids, max_length=len)
     print("Output:\n" + 100 * '-')
     print(tokenizer.decode(greedy_output[0], skip_special_tokens=True))
 

@@ -42,7 +42,7 @@ class GPT(nn.Module):
         return logits, loss
 
     @torch.no_grad() 
-    def generate(self, idx, max_length, pad_token_id=50256, temperature=1.0, top_k=None):
+    def generate(self, idx, max_length, temperature=1.0, top_k=None):
         # idx: B, T
         for _ in range(max_length):
             idx = idx[:, -self.config['window_size']:]
@@ -115,14 +115,12 @@ class MLP(nn.Module):
         super().__init__()
         embed_dim = config['hidden_size']
         intermediate_size = 4 * embed_dim
-        self.c_fc = nn.Linear(embed_dim, intermediate_size)
-        self.c_proj = nn.Linear(intermediate_size, embed_dim)
-        self.act = nn.GELU()
-        self.dropout = nn.Dropout(0.1)
 
+        self.layers = nn.Sequential(
+            nn.Linear(embed_dim, intermediate_size),
+            nn.GELU(),
+            nn.Linear(intermediate_size, embed_dim),
+            nn.Dropout(0.1)
+        )
     def forward(self, hidden_states):
-        hidden_states = self.c_fc(hidden_states)
-        hidden_states = self.act(hidden_states)
-        hidden_states = self.c_proj(hidden_states)
-        hidden_states = self.dropout(hidden_states)
-        return hidden_states
+        return self.layers(hidden_states)

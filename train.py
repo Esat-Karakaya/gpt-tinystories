@@ -17,15 +17,15 @@ parser.add_argument('--cfg_param',
                     type=str,
                     default="1M")
 args = parser.parse_args()
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-device = "cpu"
-
-print("running on", device)
-epochs = 3
-seed = 3407
 cfg_param = args.cfg_param
 cfg = load_config(f"configs/config-{cfg_param}.json")
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print("running on", device)
+
+epochs = 3
+seed = 3407
+
 batch_size = cfg["batch_size"]
 window_size = cfg["window_size"]
 lr = cfg["learning_rate"]
@@ -44,7 +44,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 
 # Instantiate dataloader
-train_loader = DataLoader(dataset['train'], batch_size=64, shuffle=True)
+train_loader = DataLoader(dataset['train'], batch_size=batch_size, shuffle=True)
 valid_loader = DataLoader(dataset['validation'], batch_size=batch_size, shuffle=True)
 
 # Instantiate model and optimizer
@@ -71,7 +71,7 @@ for epoch in range(epochs):
     logging.info(f"Epoch: {epoch+1}")
     for batch in tqdm(train_loader):
         optim.zero_grad()
-        tokenized = tokenizer(batch['text'], padding=True, return_tensors='pt', max_length=256, truncation=True)['input_ids'].to(device)
+        tokenized = tokenizer(batch['text'], padding=True, return_tensors='pt', max_length=cfg["max_position_embeddings"], truncation=True)['input_ids'].to(device)
         _, loss = model(tokenized, tokenized)
         if torch.cuda.device_count() > 1:
             loss = loss.mean()
