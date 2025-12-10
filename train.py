@@ -4,7 +4,6 @@ from datetime import datetime
 
 import torch
 import torch.nn as nn
-import wandb
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -20,6 +19,9 @@ parser.add_argument('--cfg_param',
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = "cpu"
+
+print("running on", device)
 epochs = 3
 seed = 3407
 cfg_param = args.cfg_param
@@ -62,21 +64,6 @@ if resume_training:
     logging.info(f"Resuming training for {model_filename}")
     updates = load_checkpoint(model, optim, model_filename)
 
-# Setup weights & biases
-run = wandb.init(
-    project="gpt-tinystories",
-    name=f"gpt-tinystories-{cfg_param}-{current_time}",
-    config={
-        "cfg_param": cfg_param,
-        "learning_rate": lr,
-        "batch_size": batch_size,
-        "model_filename": model_filename,
-        "log_filename": log_filename,
-        "seed": seed,
-        "epochs": epochs
-    },
-    mode="offline"
-)
 logging.info(f"cfg_param: {cfg_param}, lr: {lr}, batch_size: {batch_size}, model_filename: {model_filename}, log_filename: {log_filename}, seed: {seed}, epochs: {epochs}")
 
 # Training loop
@@ -95,7 +82,6 @@ for epoch in range(epochs):
             validation_loss = estimate_loss(model, tokenizer, valid_loader)
             tqdm.write(f"Train_{epoch+1}_{updates}: {validation_loss}")
             logging.info(f"Train_{epoch+1}_{updates}: {validation_loss}")
-            wandb.log({"train_loss": loss, "val_loss": validation_loss})
         if updates % 2000 == 0:
             save_checkpoint(model, optim, updates, model_filename)
     logging.info("TRAINING COMPLETE")
@@ -109,10 +95,6 @@ for epoch in range(epochs):
             loss_valid += loss.mean().item()
         logging.info(f"Final validation loss: {loss_valid / len(valid_loader)}")
         save_checkpoint(model, optim, updates, model_filename)
-        # save trained model as artifact to wandb
-        model_artifact = wandb.Artifact('model_artifact', type='model')
-        model_artifact.add_file(model_filename)
-        wandb.log_artifact(model_artifact)
 
 # Trained model output
 test_language_modeling(model, tokenizer)

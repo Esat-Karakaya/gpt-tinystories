@@ -8,3 +8,4 @@ tokenized_dataset.hf/
 wandb/
 .vscode/
 logs/
+output.txt
