@@ -2,14 +2,11 @@ import argparse
 import logging
 from datetime import datetime
 
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import wandb
 from datasets import load_dataset
-from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
@@ -19,7 +16,7 @@ from utils import *  # contains all of the helper methods
 parser = argparse.ArgumentParser()
 parser.add_argument('--cfg_param', 
                     type=str,
-                    default="8M")
+                    default="1M")
 args = parser.parse_args()
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -78,6 +75,7 @@ run = wandb.init(
         "seed": seed,
         "epochs": epochs
     },
+    mode="offline"
 )
 logging.info(f"cfg_param: {cfg_param}, lr: {lr}, batch_size: {batch_size}, model_filename: {model_filename}, log_filename: {log_filename}, seed: {seed}, epochs: {epochs}")
 

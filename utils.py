@@ -1,7 +1,9 @@
 import json
 import numpy as np
 import random
-import torch 
+import torch
+import torch.nn as nn
+from model import GPT
 
 def load_config(path):
     with open(path, 'r') as f:
