@@ -26,12 +26,12 @@ class CausalLM(nn.Module):
         super().__init__()
         modelcfg = cfg["model"]
         self.modelcfg=modelcfg
-        self.eos_token_id = cfg["tokenizer"]["eos_token_id"]
+        self.eos_token_id = cfg["tokenizer"].eos_token_id
         self.model = GPTNeoModel(modelcfg)
-        self.out_head = nn.Linear( modelcfg["hidden_size"], modelcfg["vocab_size"], bias=False )
+        self.out_head = nn.Linear( modelcfg.hidden_size, modelcfg.vocab_size, bias=False )
 
     def forward(self, x):
-        out = self.model(x)
+        out = self.model(x)["last_hidden_state"]
         out = self.out_head(out)
         return out
     
@@ -43,9 +43,15 @@ class CausalLM(nn.Module):
     
     @torch.no_grad() 
     def generate(self, idx, max_length, temperature=1.0, top_k=None):
+
+        # support for unbatched
+        inp_dim = len(idx.shape)
+        if inp_dim==1:
+            idx = idx.unsqueeze(0)
+
         # idx: B, T
         for _ in range(max_length):
-            idx = idx[:, -self.modelcfg['max_position_embeddings']:]
+            idx = idx[:, -self.modelcfg.max_position_embeddings:]
             logits = self(idx)
             logits = logits[:, -1, :] / temperature
 
@@ -61,4 +67,8 @@ class CausalLM(nn.Module):
 
             if idx[:, -1] == self.eos_token_id:
                 break
+
+        if inp_dim==1:
+            idx = idx.squeeze()
+
         return idx
