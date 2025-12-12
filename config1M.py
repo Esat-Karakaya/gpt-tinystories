@@ -34,8 +34,6 @@ cfg = {
     "model":modelcfg,
     "tokenizer": tokenizer,
 
-    "training":{
-        "batch_size": 32,
-        "learning_rate": 1e-3
-    }
+    "batch_size": 32,
+    "learning_rate": 1e-3
 }
