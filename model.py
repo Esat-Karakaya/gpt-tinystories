@@ -21,21 +21,12 @@ configuration = GPTNeoConfig(
     eos_token_id=50256,
 )
 
-# Initializing a model (with random weights) from the EleutherAI/gpt-neo-1.3B style configuration
-model = GPTNeoModel(configuration)
-
-paramsize = sum(p.numel() for p in model.parameters())
-paramsize -= model.wpe.weight.numel()
-print(f"Parameter size: {paramsize/1e6:.1f}M")
-print(configuration.hidden_size)
-
-# tokenizer = AutoTokenizer.from_pretrained("roneneldan/TinyStories-1M")
-
 class CausalLM(nn.Module):
     def __init__(self, cfg: GPTNeoConfig):
         super().__init__()
-        self.model = GPTNeoModel(cfg)
-        self.out_head = nn.Linear( cfg.hidden_size, cfg.vocab_size, bias=False )
+        modelcfg = cfg["model"]
+        self.model = GPTNeoModel(modelcfg)
+        self.out_head = nn.Linear( modelcfg.hidden_size, modelcfg.vocab_size, bias=False )
 
     def forward(self, x):
         out = self.model(x)

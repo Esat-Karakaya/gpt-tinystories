@@ -1,53 +1,12 @@
-import json
 import numpy as np
 import random
 import torch
-import torch.nn as nn
-from model import GPT
 
-def load_config(path):
-    with open(path, 'r') as f:
-        cfg = json.load(f)
-    return cfg
-
-def load_data(load_train=False, to_torch=True):
-    if load_train:
-        if to_torch:
-            with open('train.bin', 'rb') as f:
-                binary_data = f.read()
-                m = np.frombuffer(binary_data, dtype=np.int32)
-                m = torch.from_numpy(m)
-        else:    
-            m = np.memmap('train.bin', dtype='int16', mode='r')
-        return m
-    else:
-        if to_torch:
-            with open('valid.bin', 'rb') as f:
-                binary_data = f.read()
-                m = np.frombuffer(binary_data, dtype=np.int32)
-                print(type(m))
-                m = torch.from_numpy(m)
-        else:   
-            m = np.memmap('valid.bin', dtype='int16', mode='r')
-        return m
-
-# Only loads state dict
-def load_model(cfg, path, parallel=False, device='cuda'):
-    model = GPT(cfg)
-    if parallel:
-        model = nn.DataParallel(model)
-    model.to(device)
-    model.load_state_dict(path)
-    return model
-
-def test_language_modeling(model, tokenizer, len=200, prompt=None, device='cuda', multiGPU=False):
+def test_language_modeling(model, tokenizer, len=200, prompt=None, device='cuda'):
     if prompt is None:
         prompt = "One day, a little girl named Lily found a needle in her room."
     input_ids = tokenizer.encode(prompt, return_tensors="pt").to(device)
-    if torch.cuda.device_count() > 1 or multiGPU:
-        greedy_output = model.module.generate(input_ids, pad_token_id=tokenizer.pad_token_id, max_length=len)
-    else:
-        greedy_output = model.generate(input_ids, max_length=len)
+    greedy_output = model.generate(input_ids, max_length=len)
     print("Output:\n" + 100 * '-')
     print(tokenizer.decode(greedy_output[0], skip_special_tokens=True))
 
@@ -79,23 +38,6 @@ def load_checkpoint(model, filename, optim=None):
         optim.load_state_dict(checkpoint['optimizer'])
     updates = checkpoint['updates']
     return updates
-
-def encode_large_text_file(file_path, tokenizer, chunk_size=4096):
-    # Open the file and initialize an empty list to store encoded chunks
-    with open(file_path, 'r', encoding='utf-8') as file:
-        encoded_chunks = []
-        # Read the file in chunks
-        while True:
-            chunk = file.read(chunk_size)
-            # Break the loop if the end of the file is reached
-            if not chunk:
-                break
-            # Encode the chunk using the tokenizer
-            encoded_chunk = tokenizer.encode(chunk, return_tensors="pt")
-            encoded_chunks.append(encoded_chunk)
-    # Concatenate the list of encoded chunks along the sequence dimension
-    final_encoded_output = torch.cat(encoded_chunks, dim=-1)
-    return final_encoded_output.numpy().astype(np.uint16)
 
 def setup_seed(seed):
      torch.manual_seed(seed)
