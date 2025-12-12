@@ -25,8 +25,10 @@ class CausalLM(nn.Module):
     def __init__(self, cfg: GPTNeoConfig):
         super().__init__()
         modelcfg = cfg["model"]
+        self.modelcfg=modelcfg
+        self.eos_token_id = cfg["tokenizer"]["eos_token_id"]
         self.model = GPTNeoModel(modelcfg)
-        self.out_head = nn.Linear( modelcfg.hidden_size, modelcfg.vocab_size, bias=False )
+        self.out_head = nn.Linear( modelcfg["hidden_size"], modelcfg["vocab_size"], bias=False )
 
     def forward(self, x):
         out = self.model(x)
@@ -43,13 +45,20 @@ class CausalLM(nn.Module):
     def generate(self, idx, max_length, temperature=1.0, top_k=None):
         # idx: B, T
         for _ in range(max_length):
-            idx = idx[:, -self.config['window_size']:]
-            logits, _ = self(idx)
+            idx = idx[:, -self.modelcfg['max_position_embeddings']:]
+            logits = self(idx)
             logits = logits[:, -1, :] / temperature
+
+            # Filter logits with top_k sampling
             if top_k is not None:
-                v, k = torch.topk(logits, min(top_k, logits.size(-1)))
-                logits[logits < v[:, [-1]]] = float('-inf')
+                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                min_val = v[:, [-1]]
+                logits[logits < min_val] = float('-inf')
+
             probs = F.softmax(logits, dim=-1)
             next_idx = torch.multinomial(probs, num_samples=1)
             idx = torch.cat([idx, next_idx], dim=1)
+
+            if idx[:, -1] == self.eos_token_id:
+                break
         return idx

@@ -1,4 +1,4 @@
-import argparse
+from config1M import cfg
 import logging
 from datetime import datetime
 
@@ -12,27 +12,16 @@ from transformers import AutoTokenizer
 from model import GPT
 from utils import *  # contains all of the helper methods
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--cfg_param', 
-                    type=str,
-                    default="1M")
-args = parser.parse_args()
-cfg_param = args.cfg_param
-cfg = load_config(f"configs/config-{cfg_param}.json")
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print("running on", device)
-
+device="cpu"
 epochs = 3
 seed = 3407
 
 batch_size = cfg["batch_size"]
-window_size = cfg["window_size"]
 lr = cfg["learning_rate"]
 
 # Set up logger
 current_time = datetime.now().strftime("%m%d_%H%M%S")
-log_filename = f"logs/training_{cfg_param}_{current_time}.log"
+log_filename = f"logs/training_{cfg["name"]}_{current_time}.log"
 logging.basicConfig(filename=log_filename, level=logging.INFO,
                     format='%(asctime)s %(levelname)s: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -40,8 +29,7 @@ logging.basicConfig(filename=log_filename, level=logging.INFO,
 # Load dataset and tokenizer
 model_name = 'roneneldan/TinyStories'
 dataset = load_dataset(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-tokenizer.pad_token = tokenizer.eos_token
+tokenizer = cfg["tokenizer"]
 
 # Instantiate dataloader
 train_loader = DataLoader(dataset['train'], batch_size=batch_size, shuffle=True)
@@ -50,21 +38,18 @@ valid_loader = DataLoader(dataset['validation'], batch_size=batch_size, shuffle=
 # Instantiate model and optimizer
 setup_seed(seed)
 model = GPT(cfg)
-if torch.cuda.device_count() > 1:
-    # if multiple gpus on single machine
-    model = nn.DataParallel(model)
 model.to(device)
 optim = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.95))
 
 updates = 0
-model_filename = f"models/model_{cfg_param}_{current_time}.pt.tar"
+model_filename = f"models/model_{cfg["name"]}_{current_time}.pth"
 resume_training = False
 if resume_training:
     model_filename = ""
     logging.info(f"Resuming training for {model_filename}")
     updates = load_checkpoint(model, optim, model_filename)
 
-logging.info(f"cfg_param: {cfg_param}, lr: {lr}, batch_size: {batch_size}, model_filename: {model_filename}, log_filename: {log_filename}, seed: {seed}, epochs: {epochs}")
+logging.info(f"cfg_param: {cfg["name"]}, lr: {lr}, batch_size: {batch_size}, model_filename: {model_filename}, log_filename: {log_filename}, seed: {seed}, epochs: {epochs}")
 
 # Training loop
 for epoch in range(epochs):
