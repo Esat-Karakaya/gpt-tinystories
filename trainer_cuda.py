@@ -36,20 +36,28 @@ if(os.path.isfile(saved_model_file)):
 from dataloader import train_loader, val_loader
 optim = torch.optim.Adam(sml.parameters(), lr=cfg["learning_rate"])
 
+scaler = torch.amp.GradScaler("cuda")
+
 batch_cnt=0
 train_losses=[]
 val_losses=[]
 for epoch in range(epochs):
     for x, y in tqdm(train_loader):
         optim.zero_grad()
-        loss = sml.calc_loss(x, y, device)
-        loss.backward()
-        optim.step()
+
+        # New: added scalers for saving vram
+        with torch.amp.autocast("cuda"):
+            loss = sml.calc_loss(x, y, device)
+        scaler.scale(loss).backward()
+        scaler.step(optim)
+        scaler.update()
+
         batch_cnt+=1
         
         if batch_cnt%val_freq==0:
-            train_loss = calc_loader_loss(sml, train_loader, sample_size, device)
-            val_loss = calc_loader_loss(sml, val_loader, sample_size, device)
+            with torch.amp.autocast("cuda"):
+                train_loss = calc_loader_loss(sml, train_loader, sample_size, device)
+                val_loss = calc_loader_loss(sml, val_loader, sample_size, device)
             train_losses.append(train_loss)
             val_losses.append(val_loss)
             print((
@@ -57,7 +65,7 @@ for epoch in range(epochs):
                 f"val_loss: {val_loss}, val_perplexity: {math.exp(val_loss)}"
             ))
         
-        if batch_cnt%val_freq*2==0:
+        if batch_cnt%(val_freq*10)==0:
             break
 
 sml.eval()
