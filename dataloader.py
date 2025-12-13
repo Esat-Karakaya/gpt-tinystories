@@ -3,8 +3,6 @@ import torch
 from datasets import load_dataset, load_from_disk
 from torch.utils.data import DataLoader
 
-print("Launched!")
-
 batch_size = cfg["batch_size"]
 
 # Load dataset
@@ -48,7 +46,15 @@ def collate_fn(batch, tokenizer):
         target
     )
 
+torch.manual_seed(cfg["seed"])
 train_loader = DataLoader(
+    dataset=train_dataset,
+    batch_size=batch_size,
+    shuffle=True,
+    collate_fn=lambda batch: collate_fn(batch, tokenizer),
+    drop_last=True,
+)
+val_loader = DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
     shuffle=True,

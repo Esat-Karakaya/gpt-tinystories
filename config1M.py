@@ -36,6 +36,11 @@ cfg = {
     "model":modelcfg,
     "tokenizer": tokenizer,
 
+    "epoch":2,
     "batch_size": 64,
-    "learning_rate": 1e-3
+    "learning_rate": 1e-3,
+    "val_freq": 40,
+    "sample_size": 30,
+    "seed": 64,
+    "model_location":"models/sml/"
 }

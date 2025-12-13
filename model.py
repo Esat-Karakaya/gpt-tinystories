@@ -1,28 +1,10 @@
-from transformers import GPTNeoConfig, GPTNeoModel
+from transformers import GPTNeoModel
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-# Initializing a GPTNeo EleutherAI/gpt-neo-1.3B style configuration
-configuration = GPTNeoConfig(
-    vocab_size=50257,
-    max_position_embeddings=2048,
-    hidden_size=64,
-    num_layers=8,
-    attention_types=[[["global", "local"], 4]],
-    num_heads=16, # unknown
-    intermediate_size=256,
-    window_size=256,
-    resid_dropout=0,
-    embed_dropout=0,
-    attention_dropout=0,
-    classifier_dropout=0,
-    bos_token_id=50256,
-    eos_token_id=50256,
-)
-
 class CausalLM(nn.Module):
-    def __init__(self, cfg: GPTNeoConfig):
+    def __init__(self, cfg):
         super().__init__()
         modelcfg = cfg["model"]
         self.modelcfg=modelcfg
@@ -54,7 +36,8 @@ class CausalLM(nn.Module):
     
     @torch.no_grad() 
     def generate(self, idx, max_length, temperature=1.0, top_k=None):
-
+        init_mode = self.training
+        self.eval()
         # support for unbatched
         inp_dim = len(idx.shape)
         if inp_dim==1:
@@ -81,5 +64,7 @@ class CausalLM(nn.Module):
 
         if inp_dim==1:
             idx = idx.squeeze()
+        if init_mode:
+            self.train()
 
         return idx
