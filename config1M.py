@@ -27,13 +27,15 @@ except Exception as e:
     model_name = 'roneneldan/TinyStories'
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.save_pretrained("./models/local_tokenizer")
+
 tokenizer.pad_token = tokenizer.eos_token
+# causes: tokenizer.pad_token_id = tokenizer.eos_token_id
 
 cfg = {
     "name":"1M",
     "model":modelcfg,
     "tokenizer": tokenizer,
 
-    "batch_size": 32,
+    "batch_size": 64,
     "learning_rate": 1e-3
 }

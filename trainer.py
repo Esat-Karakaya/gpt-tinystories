@@ -2,17 +2,15 @@ from config1M import cfg
 from model import CausalLM
 import torch
 
-tokenizer = cfg["tokenizer"]
+device=torch.device("cpu")
+if torch.cuda.is_available():
+    device = torch.device("cuda")
 
-sml = CausalLM(cfg)
-idx = tokenizer.encode("Hello")
+try:
+    import torch_xla # type: ignore
+    import torch_xla.core.xla_model as xm # type: ignore
+    device = torch_xla.device()
+except ImportError:
+    pass
 
-generated = sml.generate(
-    idx=torch.tensor(idx),
-    max_length=15
-)
-print(generated.tolist())
-
-print(
-    tokenizer.decode(generated.tolist())
-)
+print("running on", device)

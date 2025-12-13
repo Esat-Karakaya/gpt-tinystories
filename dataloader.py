@@ -24,7 +24,7 @@ except:
     
 
 tokenizer = cfg["tokenizer"]
-context_size = cfg["model"].max_position_embeddings
+max_context = cfg["model"].max_position_embeddings
 
 def collate_fn(batch, tokenizer):
     stories = torch.utils.data.default_collate(batch)
@@ -34,14 +34,14 @@ def collate_fn(batch, tokenizer):
         stories,
         padding=True,
         truncation=True,
-        max_length=context_size,
+        max_length=max_context,
         return_tensors="pt"
     )["input_ids"]
 
     # Shift left
     target = input.clone()
     target[:, :-1] = input[:, 1:]
-    target[:, -1] = tokenizer.eos_token_id
+    target[:, -1] = tokenizer.pad_token_id
 
     return (
         input,
