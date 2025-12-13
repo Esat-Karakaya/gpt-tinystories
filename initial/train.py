@@ -10,7 +10,7 @@ from tqdm import tqdm
 from transformers import AutoTokenizer
 
 from model import GPT
-from utils import *  # contains all of the helper methods
+from initial.utils import *  # contains all of the helper methods
 
 device="cpu"
 epochs = 3
