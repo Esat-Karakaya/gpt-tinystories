@@ -27,6 +27,7 @@ class CausalLM(nn.Module):
         modelcfg = cfg["model"]
         self.modelcfg=modelcfg
         self.eos_token_id = cfg["tokenizer"].eos_token_id
+        self.pad_token_id = cfg["tokenizer"].eos_token_id
         self.model = GPTNeoModel(modelcfg)
         self.out_head = nn.Linear( modelcfg.hidden_size, modelcfg.vocab_size, bias=False )
 
@@ -34,6 +35,16 @@ class CausalLM(nn.Module):
         out = self.model(x)["last_hidden_state"]
         out = self.out_head(out)
         return out
+    
+    def calc_loss(self, x, y, dev):
+        x, y = x.to(dev), y.to(dev)
+        res = self.forward(x)
+        # res: (B, context_size, dict_size)
+        # y: (B, context_size)
+        res = res.flatten(0, 1)
+        y = y.flatten()
+        loss = F.cross_entropy(res, y, ignore_index=self.pad_token_id)
+        return loss
     
     def get_num_params(self, non_embedding=True):
         n_params = sum(p.numel() for p in self.model.parameters())
