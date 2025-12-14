@@ -33,9 +33,6 @@ tokenizer.pad_token = tokenizer.eos_token
 
 from dataclasses import dataclass
 
-print(type(tokenizer))
-print(type(modelcfg))
-
 @dataclass
 class TrainConfig:
     name: str
