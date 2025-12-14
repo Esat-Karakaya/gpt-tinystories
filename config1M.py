@@ -1,23 +1,5 @@
 from transformers import GPTNeoConfig, AutoTokenizer, models
 
-# Initializing a GPTNeo EleutherAI/gpt-neo-1.3B style configuration
-modelcfg = GPTNeoConfig(
-    vocab_size=50257,
-    max_position_embeddings=300,
-    hidden_size=64,
-    num_layers=8,
-    attention_types=[[["global", "local"], 4]],
-    num_heads=16, # unknown
-    intermediate_size=256,
-    window_size=256,
-    resid_dropout=0,
-    embed_dropout=0,
-    attention_dropout=0,
-    classifier_dropout=0,
-    bos_token_id=50256,
-    eos_token_id=50256,
-)
-
 # Loading tokenizer
 try:
     tokenizer_pth = "./models/local_tokenizer"
@@ -46,6 +28,22 @@ class TrainConfig:
     seed: int
     model_location: str
 
+modelcfg = GPTNeoConfig(
+    vocab_size=50257,
+    max_position_embeddings=300,
+    hidden_size=64,
+    num_layers=8,
+    attention_types=[[["global", "local"], 4]],
+    num_heads=16, # unknown
+    intermediate_size=256,
+    window_size=256,
+    resid_dropout=0,
+    embed_dropout=0,
+    attention_dropout=0,
+    classifier_dropout=0,
+    bos_token_id=50256,
+    eos_token_id=50256,
+)
 
 cfg = TrainConfig(
     name="1M",

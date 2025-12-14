@@ -8,6 +8,9 @@ device="cuda"
 
 sml.load_state_dict(torch.load(file_name, map_location=device))
 
+print(sml)
+
+exit()
 tokenizer = cfg.tokenizer
 idx = tokenizer.encode("Once upon a time, there was a little girl named Jane")
 res = sml.generate(torch.tensor(idx), max_length=100, temperature=.8, top_k=12)
