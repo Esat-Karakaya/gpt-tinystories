@@ -3,7 +3,7 @@ from transformers import GPTNeoConfig, AutoTokenizer
 # Initializing a GPTNeo EleutherAI/gpt-neo-1.3B style configuration
 modelcfg = GPTNeoConfig(
     vocab_size=50257,
-    max_position_embeddings=2048,
+    max_position_embeddings=300,
     hidden_size=64,
     num_layers=8,
     attention_types=[[["global", "local"], 4]],
@@ -37,10 +37,10 @@ cfg = {
     "tokenizer": tokenizer,
 
     "epoch":2,
-    "batch_size": 64,
+    "batch_size": 32,
     "learning_rate": 1e-3,
-    "val_freq": 40,
+    "val_freq": 400,
     "sample_size": 30,
     "seed": 64,
-    "model_location":"models/sml/"
+    "model_location":"models/sml/1M"
 }

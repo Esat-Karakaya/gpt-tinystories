@@ -23,7 +23,7 @@ print("running on", device)
 epochs = cfg["epoch"]
 val_freq = cfg["val_freq"]
 sample_size = cfg["sample_size"]
-model_file = cfg["model_location"]+datetime.now().strftime("%B %d %H:%M")
+
 saved_model_file = cfg["model_location"]+"placeholder"
 
 sml = CausalLM(cfg)
@@ -65,10 +65,14 @@ for epoch in range(epochs):
                 f"val_loss: {val_loss}, val_perplexity: {math.exp(val_loss)}"
             ))
         
-        if batch_cnt%(val_freq*10)==0:
-            break
+        if batch_cnt%6000==0:
+            sml.eval()
+            model_file = cfg["model_location"]+datetime.now().strftime("%B %d %H:%M")
+            torch.save(sml.state_dict(), model_file)
+            sml.train()
 
 sml.eval()
+model_file = cfg["model_location"]+datetime.now().strftime("%B %d %H:%M")
 torch.save(sml.state_dict(), model_file)
 
 #==================
