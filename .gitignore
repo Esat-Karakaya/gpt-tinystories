@@ -4,6 +4,7 @@ __pycache__/
 archive/
 data/
 models/
+datasets/
 tokenized_dataset.hf/
 wandb/
 .vscode/
