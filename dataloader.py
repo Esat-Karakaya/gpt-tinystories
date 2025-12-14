@@ -1,4 +1,4 @@
-from config1M import cfg
+from config8M import cfg
 import torch
 from datasets import load_dataset, load_from_disk
 from torch.utils.data import DataLoader

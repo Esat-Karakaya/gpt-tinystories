@@ -1,5 +1,5 @@
 from model import CausalLM
-from config1M import cfg
+from config8M import cfg
 import torch
 
 sml = CausalLM(cfg)

@@ -32,7 +32,7 @@ class TrainConfig:
 modelcfg = GPTNeoConfig(
     vocab_size=50257,
     max_position_embeddings=300,
-    hidden_size=64,
+    hidden_size=256,
     num_layers=8,
     attention_types=[[["global", "local"], 4]],
     num_heads=16, # unknown
@@ -47,13 +47,13 @@ modelcfg = GPTNeoConfig(
 )
 
 cfg = TrainConfig(
-    name="1M",
+    name="8M",
     model=modelcfg,
     tokenizer=tokenizer,
-    epoch=2,
+    epoch=1,
     batch_size=32,
     learning_rate=1e-3,
-    val_freq=100,
+    val_freq=200,
     save_freq=6000,
     sample_size=30,
     seed=64,

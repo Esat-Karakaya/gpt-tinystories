@@ -1,4 +1,4 @@
-from config1M import cfg
+from config8M import cfg
 from model import CausalLM
 import torch
 import math
