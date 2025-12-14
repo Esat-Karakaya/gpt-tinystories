@@ -56,8 +56,11 @@ for epoch in range(epochs):
                 f"val_loss: {val_loss}, val_perplexity: {math.exp(val_loss)}"
             ))
         
-        if batch_cnt%val_freq*2==0:
-            break
+        if batch_cnt%cfg.save_freq==0:
+            sml.eval()
+            model_file = cfg.model_location+datetime.now().strftime("%B %d %H:%M")
+            torch.save(sml.state_dict(), model_file)
+            sml.train()
 
 sml.eval()
 torch.save(sml.state_dict(), model_file)

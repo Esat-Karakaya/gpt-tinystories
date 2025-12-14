@@ -24,6 +24,7 @@ class TrainConfig:
     batch_size: int
     learning_rate: float
     val_freq: int
+    save_freq: int
     sample_size: int
     seed: int
     model_location: str
@@ -52,7 +53,8 @@ cfg = TrainConfig(
     epoch=2,
     batch_size=32,
     learning_rate=1e-3,
-    val_freq=400,
+    val_freq=100,
+    save_freq=6000,
     sample_size=30,
     seed=64,
     model_location="models/sml/1M"
