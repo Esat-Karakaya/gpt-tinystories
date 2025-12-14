@@ -1,4 +1,4 @@
-from transformers import GPTNeoConfig, AutoTokenizer
+from transformers import GPTNeoConfig, AutoTokenizer, models
 
 # Initializing a GPTNeo EleutherAI/gpt-neo-1.3B style configuration
 modelcfg = GPTNeoConfig(
@@ -31,16 +31,34 @@ except Exception as e:
 tokenizer.pad_token = tokenizer.eos_token
 # causes: tokenizer.pad_token_id = tokenizer.eos_token_id
 
-cfg = {
-    "name":"1M",
-    "model":modelcfg,
-    "tokenizer": tokenizer,
+from dataclasses import dataclass
 
-    "epoch":2,
-    "batch_size": 32,
-    "learning_rate": 1e-3,
-    "val_freq": 400,
-    "sample_size": 30,
-    "seed": 64,
-    "model_location":"models/sml/1M"
-}
+print(type(tokenizer))
+print(type(modelcfg))
+
+@dataclass
+class TrainConfig:
+    name: str
+    model: models.gpt_neo.configuration_gpt_neo.GPTNeoConfig
+    tokenizer: models.gpt2.tokenization_gpt2_fast.GPT2TokenizerFast
+    epoch: int
+    batch_size: int
+    learning_rate: float
+    val_freq: int
+    sample_size: int
+    seed: int
+    model_location: str
+
+
+cfg = TrainConfig(
+    name="1M",
+    model=modelcfg,
+    tokenizer=tokenizer,
+    epoch=2,
+    batch_size=32,
+    learning_rate=1e-3,
+    val_freq=400,
+    sample_size=30,
+    seed=64,
+    model_location="models/sml/1M"
+)

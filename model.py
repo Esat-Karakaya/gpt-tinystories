@@ -6,10 +6,10 @@ import torch
 class CausalLM(nn.Module):
     def __init__(self, cfg):
         super().__init__()
-        modelcfg = cfg["model"]
+        modelcfg = cfg.model
         self.modelcfg=modelcfg
-        self.eos_token_id = cfg["tokenizer"].eos_token_id
-        self.pad_token_id = cfg["tokenizer"].eos_token_id
+        self.eos_token_id = cfg.tokenizer.eos_token_id
+        self.pad_token_id = cfg.tokenizer.eos_token_id
         self.model = GPTNeoModel(modelcfg)
         self.out_head = nn.Linear( modelcfg.hidden_size, modelcfg.vocab_size, bias=False )
 

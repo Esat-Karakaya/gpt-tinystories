@@ -3,7 +3,7 @@ import torch
 from datasets import load_dataset, load_from_disk
 from torch.utils.data import DataLoader
 
-batch_size = cfg["batch_size"]
+batch_size = cfg.batch_size
 
 # Load dataset
 try:
@@ -21,8 +21,8 @@ except:
     val_dataset = dataset["validation"]
     
 
-tokenizer = cfg["tokenizer"]
-max_context = cfg["model"].max_position_embeddings
+tokenizer = cfg.tokenizer
+max_context = cfg.model.max_position_embeddings
 
 def collate_fn(batch, tokenizer):
     stories = torch.utils.data.default_collate(batch)
@@ -46,7 +46,7 @@ def collate_fn(batch, tokenizer):
         target
     )
 
-torch.manual_seed(cfg["seed"])
+torch.manual_seed(cfg.seed)
 train_loader = DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,

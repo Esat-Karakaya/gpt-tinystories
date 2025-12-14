@@ -20,11 +20,11 @@ except ImportError:
 
 print("running on", device)
 
-epochs = cfg["epoch"]
-val_freq = cfg["val_freq"]
-sample_size = cfg["sample_size"]
+epochs = cfg.epoch
+val_freq = cfg.val_freq
+sample_size = cfg.sample_size
 
-saved_model_file = cfg["model_location"]+"placeholder"
+saved_model_file = cfg.model_location+"placeholder"
 
 sml = CausalLM(cfg)
 sml.to(device)
@@ -34,7 +34,7 @@ if(os.path.isfile(saved_model_file)):
     sml.load_state_dict(torch.load(saved_model_file, map_location=device))
 
 from dataloader import train_loader, val_loader
-optim = torch.optim.Adam(sml.parameters(), lr=cfg["learning_rate"])
+optim = torch.optim.Adam(sml.parameters(), lr=cfg.learning_rate)
 
 scaler = torch.amp.GradScaler("cuda")
 
@@ -67,12 +67,12 @@ for epoch in range(epochs):
         
         if batch_cnt%6000==0:
             sml.eval()
-            model_file = cfg["model_location"]+datetime.now().strftime("%B %d %H:%M")
+            model_file = cfg.model_location+datetime.now().strftime("%B %d %H:%M")
             torch.save(sml.state_dict(), model_file)
             sml.train()
 
 sml.eval()
-model_file = cfg["model_location"]+datetime.now().strftime("%B %d %H:%M")
+model_file = cfg.model_location+datetime.now().strftime("%B %d %H:%M")
 torch.save(sml.state_dict(), model_file)
 
 #==================
