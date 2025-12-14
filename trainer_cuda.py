@@ -1,7 +1,6 @@
 from config1M import cfg
 from model import CausalLM
 import torch
-from utils import calc_loader_loss
 import math
 import matplotlib.pyplot as plt
 import os
@@ -56,8 +55,8 @@ for epoch in range(epochs):
         
         if batch_cnt%val_freq==0:
             with torch.amp.autocast("cuda"):
-                train_loss = calc_loader_loss(sml, train_loader, sample_size, device)
-                val_loss = calc_loader_loss(sml, val_loader, sample_size, device)
+                train_loss = sml.calc_loader_loss(train_loader, sample_size, device)
+                val_loss = sml.calc_loader_loss(val_loader, sample_size, device)
             train_losses.append(train_loss)
             val_losses.append(val_loss)
             print((
