@@ -18,8 +18,8 @@ class CausalLM(nn.Module):
         out = self.out_head(out)
         return out
     
-    def calc_loss(self, x, y, dev):
-        x, y = x.to(dev), y.to(dev)
+    def calc_loss(self, x, y, device):
+        x, y = x.to(device), y.to(device)
         res = self.forward(x)
         # res: (B, context_size, dict_size)
         # y: (B, context_size)
@@ -35,7 +35,7 @@ class CausalLM(nn.Module):
         return n_params
     
     @torch.no_grad() 
-    def generate(self, idx, max_length, temperature=1.0, top_k=None):
+    def generate(self, idx, max_length, temperature=1.0, top_k=None, device="cpu"):
         init_mode = self.training
         self.eval()
         # support for unbatched
@@ -45,7 +45,7 @@ class CausalLM(nn.Module):
 
         # idx: B, T
         for _ in range(max_length):
-            idx = idx[:, -self.modelcfg.max_position_embeddings:]
+            idx = idx[:, -self.modelcfg.max_position_embeddings:].to(device)
             logits = self(idx)
             logits = logits[:, -1, :] / temperature
 
@@ -64,7 +64,21 @@ class CausalLM(nn.Module):
 
         if inp_dim==1:
             idx = idx.squeeze()
-        if init_mode:
-            self.train()
+        if init_mode: self.train()
 
         return idx
+    
+    @torch.no_grad()
+    def calc_loader_loss(self, loader, sample_size, device):
+        init_mode = self.training
+        self.eval()
+        total_loss=0.0
+        bnum=0
+        for x, y in loader:
+            loss = self.calc_loss(x, y, device)
+            total_loss += loss.item()
+            bnum+=1
+            if bnum==sample_size: break
+        
+        if init_mode: self.train()
+        return total_loss/bnum
