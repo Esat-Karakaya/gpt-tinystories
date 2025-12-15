@@ -57,5 +57,5 @@ cfg = TrainConfig(
     save_freq=6000,
     sample_size=30,
     seed=64,
-    model_location="models/sml/1M"
+    model_location="models/sml/8M"
 )
