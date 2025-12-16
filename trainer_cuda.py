@@ -1,53 +1,32 @@
-import os
-os.makedirs("models/sml", exist_ok=True)
-os.makedirs("models/local_tokenizer", exist_ok=True)
-
 from config8M import cfg
 from model import CausalLM
 import torch
-import math
 import matplotlib.pyplot as plt
 from datetime import datetime
 from tqdm import tqdm
+from utils import save_model, log_state
+from dataloader import train_loader, val_loader
 
-device=torch.device("cpu")
+device = "cpu"
 if torch.cuda.is_available():
-    device = torch.device("cuda")
-
-try:
-    import torch_xla # type: ignore
-    device = torch_xla.device()
-except ImportError:
-    pass
-
+    device = "cuda"
 print("running on", device)
-
-epochs = cfg.epoch
-val_freq = cfg.val_freq
-sample_size = cfg.sample_size
 
 sml = CausalLM(cfg)
 sml.to(device)
 
-saved_model_file = cfg.model_location+"placeholder"
-# load model if possible
-if(os.path.isfile(saved_model_file)):
-    sml.load_state_dict(torch.load(saved_model_file, map_location=device))
-
-from dataloader import train_loader, val_loader
-optim = torch.optim.Adam(sml.parameters(), lr=cfg.learning_rate)
-
 #grad scaling
 scaler = torch.amp.GradScaler(device=device)
 
+optim = torch.optim.Adam(sml.parameters(), lr=cfg.learning_rate)
 batch_cnt=0
 train_losses=[]
 val_losses=[]
 train_batches_loss=[0]*cfg.sample_size
-for epoch in range(epochs):
+for epoch in range(cfg.epoch):
     for x, y in tqdm(train_loader):
-        optim.zero_grad()
 
+        optim.zero_grad()
         with torch.autocast(device_type='cuda', dtype=torch.float16):
             loss = sml.calc_loss(x, y, device)
 
@@ -56,34 +35,24 @@ for epoch in range(epochs):
         scaler.step(optim)
 
         train_batches_loss[batch_cnt%cfg.sample_size] = loss.item()
-
         batch_cnt+=1
         
-        if batch_cnt%val_freq==0:
-            train_loss = sum(train_batches_loss)/cfg.sample_size
-
-            with torch.autocast(device_type='cuda', dtype=torch.float16):
-                val_loss = sml.calc_loader_loss(val_loader, sample_size, device)
-
+        if batch_cnt%cfg.val_freq==0:
+            train_loss, val_loss = log_state(
+                model=sml, cfg=cfg,
+                train_loss_cache=train_batches_loss,
+                val_loader=val_loader, device=device
+            )
             train_losses.append(train_loss)
             val_losses.append(val_loss)
-            print((
-                f"Epoch {epoch}, train_loss: {train_loss},"
-                f"val_loss: {val_loss}, val_perplexity: {math.exp(val_loss)}"
-            ))
         
         if batch_cnt%cfg.save_freq==0:
-            sml.eval()
-            checkpoint_file = cfg.model_location+"checkpoint"
-            torch.save({
-                "model":sml.state_dict(),
-                "optim":optim.state_dict(),
-                "train_losses": train_losses,
-                "val_losses": val_losses,
-                "epoch":epoch,
-
-            }, checkpoint_file)
-            sml.train()
+            save_model(
+                model=sml, cfg=cfg, optim=optim,
+                train_losses=train_losses,
+                val_losses=val_losses,
+                epoch=epoch, batch_cnt=batch_cnt
+            )
         
         scaler.update()
 

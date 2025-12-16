@@ -2,6 +2,7 @@ from config8M import cfg
 import torch
 from datasets import load_dataset, load_from_disk
 from torch.utils.data import DataLoader
+from utils import collate_fn, is_notebook
 
 batch_size = cfg.batch_size
 
@@ -14,8 +15,9 @@ except:
     model_name = 'roneneldan/TinyStories'
     dataset = load_dataset(model_name)
 
-    dataset["train"].save_to_disk("./datasets/ts_train")
-    dataset["validation"].save_to_disk("./datasets/ts_val")
+    if is_notebook():
+        dataset["train"].save_to_disk("./datasets/ts_train")
+        dataset["validation"].save_to_disk("./datasets/ts_val")
 
     train_dataset = dataset["train"]
     val_dataset = dataset["validation"]
@@ -24,40 +26,18 @@ except:
 tokenizer = cfg.tokenizer
 max_context = cfg.model.max_position_embeddings
 
-def collate_fn(batch, tokenizer):
-    stories = torch.utils.data.default_collate(batch)
-    stories = stories["text"]
-    
-    input = tokenizer(
-        stories,
-        padding=True,
-        truncation=True,
-        max_length=max_context,
-        return_tensors="pt"
-    )["input_ids"]
-
-    # Shift left
-    target = input.clone()
-    target[:, :-1] = input[:, 1:]
-    target[:, -1] = tokenizer.pad_token_id
-
-    return (
-        input,
-        target
-    )
-
 torch.manual_seed(cfg.seed)
 train_loader = DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
     shuffle=True,
-    collate_fn=lambda batch: collate_fn(batch, tokenizer),
+    collate_fn=lambda batch: collate_fn(batch, tokenizer, max_context),
     drop_last=True,
 )
 val_loader = DataLoader(
     dataset=train_dataset,
     batch_size=batch_size,
     shuffle=True,
-    collate_fn=lambda batch: collate_fn(batch, tokenizer),
+    collate_fn=lambda batch: collate_fn(batch, tokenizer, max_context),
     drop_last=True,
 )
