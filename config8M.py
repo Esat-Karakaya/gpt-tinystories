@@ -56,7 +56,7 @@ cfg = TrainConfig(
     val_freq=200,
     save_freq=6000,
     sample_size=30,
-    seed=64,
+    seed=64, # Needs to be the same pre&post checkpoint
     model_location="models/sml/8M"
 )
 

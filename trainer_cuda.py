@@ -1,9 +1,12 @@
+import os
+os.makedirs("models/sml", exist_ok=True)
+os.makedirs("models/local_tokenizer", exist_ok=True)
+
 from config8M import cfg
 from model import CausalLM
 import torch
 import math
 import matplotlib.pyplot as plt
-import os
 from datetime import datetime
 from tqdm import tqdm
 
@@ -23,11 +26,10 @@ epochs = cfg.epoch
 val_freq = cfg.val_freq
 sample_size = cfg.sample_size
 
-saved_model_file = cfg.model_location+"placeholder"
-
 sml = CausalLM(cfg)
 sml.to(device)
 
+saved_model_file = cfg.model_location+"placeholder"
 # load model if possible
 if(os.path.isfile(saved_model_file)):
     sml.load_state_dict(torch.load(saved_model_file, map_location=device))
@@ -72,8 +74,15 @@ for epoch in range(epochs):
         
         if batch_cnt%cfg.save_freq==0:
             sml.eval()
-            model_file = cfg.model_location+datetime.now().strftime("%B %d %H:%M")
-            torch.save(sml.state_dict(), model_file)
+            checkpoint_file = cfg.model_location+"checkpoint"
+            torch.save({
+                "model":sml.state_dict(),
+                "optim":optim.state_dict(),
+                "train_losses": train_losses,
+                "val_losses": val_losses,
+                "epoch":epoch,
+
+            }, checkpoint_file)
             sml.train()
         
         scaler.update()
