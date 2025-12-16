@@ -35,6 +35,9 @@ if(os.path.isfile(saved_model_file)):
 from dataloader import train_loader, val_loader
 optim = torch.optim.Adam(sml.parameters(), lr=cfg.learning_rate)
 
+#grad scaling
+scaler = torch.amp.GradScaler(device=device)
+
 batch_cnt=0
 train_losses=[]
 val_losses=[]
@@ -43,16 +46,23 @@ for epoch in range(epochs):
     for x, y in tqdm(train_loader):
         optim.zero_grad()
 
-        loss = sml.calc_loss(x, y, device)
-        loss.backward()
-        optim.step()
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
+            loss = sml.calc_loss(x, y, device)
+
+        # Note: TPU's don't need a scaler
+        scaler.scale(loss).backward()
+        scaler.step(optim)
+
         train_batches_loss[batch_cnt%cfg.sample_size] = loss.item()
 
         batch_cnt+=1
         
         if batch_cnt%val_freq==0:
-            train_loss = sum(train_batches_loss)
-            val_loss = sml.calc_loader_loss(val_loader, sample_size, device)
+            train_loss = sum(train_batches_loss)/cfg.sample_size
+
+            with torch.autocast(device_type='cuda', dtype=torch.float16):
+                val_loss = sml.calc_loader_loss(val_loader, sample_size, device)
+
             train_losses.append(train_loss)
             val_losses.append(val_loss)
             print((
@@ -65,6 +75,8 @@ for epoch in range(epochs):
             model_file = cfg.model_location+datetime.now().strftime("%B %d %H:%M")
             torch.save(sml.state_dict(), model_file)
             sml.train()
+        
+        scaler.update()
 
 sml.eval()
 model_file = cfg.model_location+datetime.now().strftime("%B %d %H:%M")
