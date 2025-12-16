@@ -59,3 +59,6 @@ cfg = TrainConfig(
     seed=64,
     model_location="models/sml/8M"
 )
+
+if(cfg.sample_size>cfg.val_freq):
+    assert "Bad config: sample_size may not be bigger than val_freq"

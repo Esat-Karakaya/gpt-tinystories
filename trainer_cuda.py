@@ -38,6 +38,7 @@ optim = torch.optim.Adam(sml.parameters(), lr=cfg.learning_rate)
 batch_cnt=0
 train_losses=[]
 val_losses=[]
+train_batches_loss=[0]*cfg.sample_size
 for epoch in range(epochs):
     for x, y in tqdm(train_loader):
         optim.zero_grad()
@@ -45,10 +46,12 @@ for epoch in range(epochs):
         loss = sml.calc_loss(x, y, device)
         loss.backward()
         optim.step()
+        train_batches_loss[batch_cnt%cfg.sample_size] = loss.item()
+
         batch_cnt+=1
         
         if batch_cnt%val_freq==0:
-            train_loss = sml.calc_loader_loss(train_loader, sample_size, device)
+            train_loss = sum(train_batches_loss)
             val_loss = sml.calc_loader_loss(val_loader, sample_size, device)
             train_losses.append(train_loss)
             val_losses.append(val_loss)
