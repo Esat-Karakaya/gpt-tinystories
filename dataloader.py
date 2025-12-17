@@ -15,7 +15,7 @@ except:
     model_name = 'roneneldan/TinyStories'
     dataset = load_dataset(model_name)
 
-    if is_notebook():
+    if is_notebook()==False:
         dataset["train"].save_to_disk("./datasets/ts_train")
         dataset["validation"].save_to_disk("./datasets/ts_val")
 

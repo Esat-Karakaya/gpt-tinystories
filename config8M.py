@@ -9,7 +9,7 @@ except Exception as e:
     print("Error:", e)
     model_name = 'roneneldan/TinyStories'
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    if is_notebook():
+    if is_notebook()==False:
         tokenizer.save_pretrained("./models/local_tokenizer")
 
 tokenizer.pad_token = tokenizer.eos_token
