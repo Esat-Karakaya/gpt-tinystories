@@ -27,7 +27,7 @@ for epoch in range(cfg.epoch):
     for x, y in tqdm(train_loader):
 
         optim.zero_grad()
-        with torch.autocast(device_type='cuda', dtype=torch.float16):
+        with torch.autocast(device_type=device, dtype=torch.float16):
             loss = sml.calc_loss(x, y, device)
 
         # Note: TPU's don't need a scaler

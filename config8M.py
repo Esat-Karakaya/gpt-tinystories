@@ -1,4 +1,5 @@
 from transformers import GPTNeoConfig, AutoTokenizer, models
+from utils import is_notebook
 
 # Loading tokenizer
 try:
@@ -8,7 +9,8 @@ except Exception as e:
     print("Error:", e)
     model_name = 'roneneldan/TinyStories'
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    tokenizer.save_pretrained("./models/local_tokenizer")
+    if is_notebook():
+        tokenizer.save_pretrained("./models/local_tokenizer")
 
 tokenizer.pad_token = tokenizer.eos_token
 # causes: tokenizer.pad_token_id = tokenizer.eos_token_id
