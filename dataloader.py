@@ -35,7 +35,7 @@ train_loader = DataLoader(
     drop_last=True,
 )
 val_loader = DataLoader(
-    dataset=train_dataset,
+    dataset=val_dataset,
     batch_size=batch_size,
     shuffle=True,
     collate_fn=lambda batch: collate_fn(batch, tokenizer, max_context),
