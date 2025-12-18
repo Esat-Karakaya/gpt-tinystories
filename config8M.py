@@ -7,7 +7,7 @@ try:
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_pth)
 except Exception as e:
     print("Error:", e)
-    model_name = 'roneneldan/TinyStories'
+    model_name = "abakirci/admbkrc-turkish-tokenizer"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if is_notebook()==False:
         tokenizer.save_pretrained("./models/local_tokenizer")
@@ -32,7 +32,7 @@ class TrainConfig:
     model_location: str
 
 modelcfg = GPTNeoConfig(
-    vocab_size=50257,
+    vocab_size=tokenizer.vocab_size,
     max_position_embeddings=300,
     hidden_size=256,
     num_layers=8,
