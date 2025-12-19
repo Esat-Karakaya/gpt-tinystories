@@ -8,19 +8,23 @@ batch_size = cfg.batch_size
 
 # Load dataset
 try:
-    train_dataset = load_from_disk("./datasets/ts_train")
-    val_dataset = load_from_disk("./datasets/ts_val")
+    train_dataset = load_from_disk("./datasets_tr/ts_train")
+    val_dataset = load_from_disk("./datasets_tr/ts_val")
 except:
     print("loading dataset failed, heading to 🤗")
-    model_name = 'roneneldan/TinyStories'
+    model_name = "umarigan/tinystories_tr"
     dataset = load_dataset(model_name)
 
     if is_notebook()==False:
-        dataset["train"].save_to_disk("./datasets/ts_train")
-        dataset["validation"].save_to_disk("./datasets/ts_val")
+        dataset["train"].save_to_disk("./datasets_tr/ts_train")
+        dataset["validation"].save_to_disk("./datasets_tr/ts_val")
 
+    split = dataset["train"].train_test_split(
+        test_size=0.001,   # %5 eval
+        seed=42
+    )
     train_dataset = dataset["train"]
-    val_dataset = dataset["validation"]
+    val_dataset = dataset["test"]
     
 
 tokenizer = cfg.tokenizer

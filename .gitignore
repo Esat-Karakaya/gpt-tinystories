@@ -10,3 +10,4 @@ wandb/
 .vscode/
 logs/
 output.txt
+datasets_tr/
