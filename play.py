@@ -7,7 +7,7 @@ from itertools import islice
 step=0
 tokenizer = cfg.tokenizer
 idx_cnt = 0
-max_step=200
+max_step=1000
 
 print("loading dataset")
 dataset = load_dataset(
@@ -32,3 +32,4 @@ for i,story in tqdm(enumerate(ds), total=max_step):
 print(idx_cnt)
 
 # 105509
+# 400759
