@@ -1,17 +1,33 @@
-from model import CausalLM
 from config8M import cfg
-import torch
+from tqdm import tqdm
 
-sml = CausalLM(cfg)
-file_name = cfg.model_location + "December 18 00_27"
-device="cuda"
+from datasets import load_dataset
+from itertools import islice
 
-sml.load_state_dict(torch.load(file_name, map_location=device))
-
+step=0
 tokenizer = cfg.tokenizer
+idx_cnt = 0
+max_step=1000
 
-idx = tokenizer.encode("Once upon a time, there was a boy named Timmy.")
-res = sml.generate(torch.tensor(idx), max_length=60, temperature=1, top_k=5)
-res_str = tokenizer.decode(res)
+print("loading dataset")
+dataset = load_dataset(
+    "roneneldan/TinyStories",
+    split="train",
+    streaming=True
+)
 
-print(res_str)
+ds = list(islice(dataset, max_step))  # only 200 samples
+
+print("loaded!")
+
+for i,story in tqdm(enumerate(ds), total=max_step):
+    str=story["text"]
+    idx = tokenizer.encode(str)
+    idx_cnt += len(idx)
+    if max_step==step:
+        break
+
+print(idx_cnt)
+
+# 39195
+# 234420
