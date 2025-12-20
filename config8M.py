@@ -2,15 +2,17 @@ from transformers import GPTNeoConfig, AutoTokenizer, models
 from utils import is_notebook
 
 # Loading tokenizer
+
+model_name = 'roneneldan/TinyStories'
+tokenizer_pth = "./models/tokenizers/" + model_name.rsplit("/", 1)[1]
+
 try:
-    tokenizer_pth = "./models/local_tokenizer"
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_pth)
 except Exception as e:
     print("Error:", e)
-    model_name = 'roneneldan/TinyStories'
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     if is_notebook()==False:
-        tokenizer.save_pretrained("./models/local_tokenizer")
+        tokenizer.save_pretrained(tokenizer_pth)
 
 tokenizer.pad_token = tokenizer.eos_token
 # causes: tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -32,7 +34,7 @@ class TrainConfig:
     model_location: str
 
 modelcfg = GPTNeoConfig(
-    vocab_size=50257,
+    vocab_size=tokenizer.vocab_size,
     max_position_embeddings=300,
     hidden_size=256,
     num_layers=8,
@@ -44,8 +46,8 @@ modelcfg = GPTNeoConfig(
     embed_dropout=0,
     attention_dropout=0,
     classifier_dropout=0,
-    bos_token_id=50256,
-    eos_token_id=50256,
+    bos_token_id=tokenizer.bos_token_id,
+    eos_token_id=tokenizer.eos_token_id,
 )
 
 cfg = TrainConfig(
