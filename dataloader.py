@@ -7,21 +7,21 @@ from utils import collate_fn, is_notebook
 batch_size = cfg.batch_size
 
 # Load dataset
+DS_NAME = 'roneneldan/TinyStories'
+ds_pth = "./datasets/" + DS_NAME.rsplit("/", 1)[1]
 try:
-    train_dataset = load_from_disk("./datasets/ts_train")
-    val_dataset = load_from_disk("./datasets/ts_val")
+    train_dataset = load_from_disk(ds_pth + "/ts_train")
+    val_dataset = load_from_disk(ds_pth + "/ts_val")
 except:
     print("loading dataset failed, heading to 🤗")
-    model_name = 'roneneldan/TinyStories'
-    dataset = load_dataset(model_name)
+    dataset = load_dataset(DS_NAME)
 
     if is_notebook()==False:
-        dataset["train"].save_to_disk("./datasets/ts_train")
-        dataset["validation"].save_to_disk("./datasets/ts_val")
+        dataset["train"].save_to_disk(ds_pth + "/ts_train")
+        dataset["validation"].save_to_disk(ds_pth + "/ts_val")
 
     train_dataset = dataset["train"]
     val_dataset = dataset["validation"]
-    
 
 tokenizer = cfg.tokenizer
 max_context = cfg.model.max_position_embeddings
