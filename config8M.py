@@ -1,4 +1,4 @@
-from transformers import GPTNeoConfig, AutoTokenizer, models
+from transformers import GPTNeoConfig, AutoTokenizer, models, PreTrainedTokenizerFast
 from utils import is_notebook
 
 # Loading tokenizer
@@ -7,7 +7,7 @@ model_name = 'roneneldan/TinyStories'
 tokenizer_pth = "./models/tokenizers/" + model_name.rsplit("/", 1)[1]
 
 try:
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer_pth)
+    tokenizer = PreTrainedTokenizerFast(tokenizer_file=tokenizer_pth+"/tokenizer.json")
 except Exception as e:
     print("Error:", e)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
