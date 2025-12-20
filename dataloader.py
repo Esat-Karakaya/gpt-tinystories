@@ -7,15 +7,16 @@ from utils import collate_fn, is_notebook
 batch_size = cfg.batch_size
 
 # Load dataset
+DS_NAME = "umarigan/tinystories_tr"
+ds_pth = "./datasets/" + DS_NAME.rsplit("/", 1)[1]
 try:
-    train_dataset = load_from_disk("./datasets_tr/ts_train")
+    train_dataset = load_from_disk(ds_pth + "/ts_train")
 except:
     print("loading dataset failed, heading to 🤗")
-    model_name = "umarigan/tinystories_tr"
-    train_dataset = load_dataset(model_name)["train"]
+    train_dataset = load_dataset(DS_NAME)["train"]
 
     if is_notebook()==False:
-        train_dataset.save_to_disk("./datasets_tr/ts_train")
+        train_dataset.save_to_disk(ds_pth + "/ts_train")
 
 split = train_dataset.train_test_split(
     test_size=0.001,   # %5 eval
@@ -23,7 +24,7 @@ split = train_dataset.train_test_split(
 )
 train_dataset = split["train"]
 val_dataset = split["test"]
-    
+
 
 tokenizer = cfg.tokenizer
 max_context = cfg.model.max_position_embeddings
