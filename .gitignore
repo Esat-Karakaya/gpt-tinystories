@@ -11,3 +11,4 @@ wandb/
 logs/
 output.txt
 datasets_tr/
+tinystories_tr/
