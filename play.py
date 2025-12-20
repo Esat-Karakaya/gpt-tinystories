@@ -1,35 +1,16 @@
 from config8M import cfg
-from tqdm import tqdm
+from model import CausalLM
+import torch
 
-from datasets import load_dataset
-from itertools import islice
+print("begining execution")
 
-step=0
+device = "cuda"
 tokenizer = cfg.tokenizer
-idx_cnt = 0
-max_step=1000
+model = CausalLM(cfg).to(device)
+state_dict = torch.load("models/sml/8MDecember 19 13_32", map_location=device, weights_only=True)
+model.load_state_dict(state_dict)
 
-print("loading dataset")
-dataset = load_dataset(
-    "umarigan/tinystories_tr",
-    split="train",
-    streaming=True
-)
+idx = tokenizer.encode("Bir zamanlar Lily adında küçük bir kız varmış. Dışarıda çimlerde")
 
-ds = list(islice(dataset, max_step))  # only 200 samples
-
-print("loaded!")
-
-for i,story in tqdm(enumerate(ds), total=max_step):
-    str=story["text"]
-    idx = tokenizer.encode(str)
-    if i==0:
-        print(idx)
-    idx_cnt += len(idx)
-    if max_step==step:
-        break
-
-print(idx_cnt)
-
-# 105509
-# 400759
+res = model.generate(torch.tensor(idx), 200, 1, 8, device)
+print(tokenizer.decode(res.tolist()))
