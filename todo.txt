@@ -1,0 +1,5 @@
+go to https://www.kaggle.com/code/esatbtw/notebook7a0ca96448/edit/run/287206931
+see how the latest version was cancelled. that's because the model wasn't converging enough. even though the lr was x3 smaller (see notebooks/plt.ipynb)
+So I decided I should add a ReduceLROnPlateau scheduler to help after stagnation.
+I removed validation loss from that kaggle bc it was useless.
+there is a model checkpoint at the cancelled v3 commit

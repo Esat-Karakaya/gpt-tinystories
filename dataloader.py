@@ -19,7 +19,7 @@ except:
         train_dataset.save_to_disk(ds_pth + "/ts_train")
 
 split = train_dataset.train_test_split(
-    test_size=0.001,   # %5 eval
+    test_size=0.001,
     seed=42
 )
 train_dataset = split["train"]

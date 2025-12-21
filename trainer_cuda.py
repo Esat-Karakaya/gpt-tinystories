@@ -41,7 +41,8 @@ for epoch in range(cfg.epoch):
             train_loss, val_loss = log_state(
                 model=sml, cfg=cfg,
                 train_loss_cache=train_batches_loss,
-                val_loader=val_loader, device=device
+                val_loader=val_loader, batch_cnt=batch_cnt,
+                device=device
             )
             train_losses.append(train_loss)
             val_losses.append(val_loss)
