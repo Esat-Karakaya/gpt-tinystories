@@ -3,3 +3,4 @@ see how the latest version was cancelled. that's because the model wasn't conver
 So I decided I should add a ReduceLROnPlateau scheduler to help after stagnation.
 I removed validation loss from that kaggle bc it was useless.
 there is a model checkpoint at the cancelled v3 commit
+I'm also considering running on a different random seed
