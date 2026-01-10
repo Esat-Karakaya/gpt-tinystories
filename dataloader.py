@@ -7,7 +7,7 @@ from utils import collate_fn, is_notebook
 batch_size = cfg.batch_size
 
 # Load dataset
-DS_NAME = "umarigan/tinystories_tr"
+DS_NAME = "esat-krky/TinyStories_Turkish"
 ds_pth = "./datasets/" + DS_NAME.rsplit("/", 1)[1]
 try:
     train_dataset = load_from_disk(ds_pth + "/ts_train")
