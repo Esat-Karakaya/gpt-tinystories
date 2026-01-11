@@ -38,20 +38,17 @@ for epoch in range(cfg.epoch):
         batch_cnt+=1
         
         if batch_cnt%cfg.val_freq==0:
-            train_loss, val_loss = log_state(
+            train_loss = log_state(
                 model=sml, cfg=cfg,
                 train_loss_cache=train_batches_loss,
-                val_loader=val_loader, batch_cnt=batch_cnt,
-                device=device
+                batch_cnt=batch_cnt
             )
             train_losses.append(train_loss)
-            val_losses.append(val_loss)
         
         if batch_cnt%cfg.save_freq==0:
             save_model(
                 model=sml, cfg=cfg, optim=optim,
                 train_losses=train_losses,
-                val_losses=val_losses,
                 epoch=epoch, batch_cnt=batch_cnt
             )
         
@@ -66,10 +63,9 @@ torch.save(sml.state_dict(), model_file)
 #==================
 plt.figure()
 plt.plot(train_losses, label="Train Loss")
-plt.plot(val_losses, label="Validation Loss")
 plt.xlabel("Time")
 plt.ylabel("Loss")
-plt.title("Training vs Validation Loss")
+plt.title("Training Loss")
 plt.legend()
 plt.grid(True)
 plt.show()

@@ -55,14 +55,11 @@ def save_model(model, cfg, optim, train_losses, val_losses, epoch, batch_cnt):
     }, checkpoint_file)
     model.train()
 
-def log_state(model, cfg, train_loss_cache, val_loader, batch_cnt, device):
+def log_state(cfg, train_loss_cache, batch_cnt):
     train_loss = sum(train_loss_cache)/cfg.sample_size
-
-    with torch.autocast(device_type=device, dtype=torch.float16):
-        val_loss = model.calc_loader_loss(val_loader, cfg.sample_size, device)
 
     print((
         f"step: {batch_cnt}, train_loss: {train_loss}, "
-        f"val_loss: {val_loss}, val_perplexity: {math.exp(val_loss)}"
+        f"perplexity: {math.exp(train_loss)}"
     ))
-    return train_loss, val_loss
+    return train_loss
