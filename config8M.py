@@ -1,16 +1,17 @@
 from transformers import GPTNeoConfig, AutoTokenizer, models, PreTrainedTokenizerFast
 
-# Loading tokenizer
+DS_NAME = "esat-krky/TinyStories_Turkish"
+TOKENIZER_NAME = "abakirci/admbkrc-turkish-tokenizer"
 
-MODEL_NAME = "abakirci/admbkrc-turkish-tokenizer"
-tokenizer_pth = "./models/tokenizers/" + MODEL_NAME.rsplit("/", 1)[1]
+# Loading tokenizer
+tokenizer_pth = "./models/tokenizers/" + TOKENIZER_NAME.rsplit("/", 1)[1]
 
 try:
     tokenizer = PreTrainedTokenizerFast(tokenizer_file=tokenizer_pth+"/tokenizer.json")
     print("loaded tokenizer from disk 💽")
 except Exception as e:
     print("heading to 🤗 to load tokenizer")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_NAME)
 
 tokenizer.pad_token = tokenizer.eos_token
 # causes: tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -29,6 +30,7 @@ class TrainConfig:
     sample_size: int
     seed: int
     model_location: str
+    ds_name: str
 
 modelcfg = GPTNeoConfig(
     vocab_size=tokenizer.vocab_size,
@@ -57,6 +59,7 @@ cfg = TrainConfig(
     val_freq=200,
     sample_size=30, # train loss is calculated by taking the last n train losses
     seed=64, # Needs to be the same pre&post checkpoint
+    ds_name=DS_NAME,
     model_location="models/sml/8M"
 )
 
