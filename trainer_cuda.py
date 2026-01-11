@@ -3,12 +3,11 @@ from model import CausalLM
 import torch
 import matplotlib.pyplot as plt
 from datetime import datetime
-from tqdm import tqdm
 from utils import log_state
 from dataloader import train_loader
 
 device = "cpu"
-if torch.cuda.is_available() and False:
+if torch.cuda.is_available():
     device = "cuda"
 print("running on", device)
 
