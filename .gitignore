@@ -12,3 +12,4 @@ logs/
 output.txt
 datasets_tr/
 TinyStories/
+loss_logs/
