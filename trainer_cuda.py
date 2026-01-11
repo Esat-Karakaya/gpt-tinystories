@@ -4,11 +4,11 @@ import torch
 import matplotlib.pyplot as plt
 from datetime import datetime
 from tqdm import tqdm
-from utils import save_model, log_state
-from dataloader import train_loader, val_loader
+from utils import log_state
+from dataloader import train_loader
 
 device = "cpu"
-if torch.cuda.is_available():
+if torch.cuda.is_available() and False:
     device = "cuda"
 print("running on", device)
 
@@ -21,11 +21,9 @@ scaler = torch.amp.GradScaler(device=device)
 optim = torch.optim.Adam(sml.parameters(), lr=cfg.learning_rate)
 batch_cnt=0
 train_losses=[]
-val_losses=[]
 train_batches_loss=[0]*cfg.sample_size
 for epoch in range(cfg.epoch):
-    for x, y in tqdm(train_loader):
-
+    for x, y in train_loader:
         optim.zero_grad()
         with torch.autocast(device_type=device, dtype=torch.float16):
             loss = sml.calc_loss(x, y, device)
@@ -43,15 +41,7 @@ for epoch in range(cfg.epoch):
                 train_loss_cache=train_batches_loss,
                 batch_cnt=batch_cnt
             )
-            train_losses.append(train_loss)
-        
-        if batch_cnt%cfg.save_freq==0:
-            save_model(
-                model=sml, cfg=cfg, optim=optim,
-                train_losses=train_losses,
-                epoch=epoch, batch_cnt=batch_cnt
-            )
-        
+            train_losses.append(train_loss)        
         scaler.update()
 
 sml.eval()
@@ -65,6 +55,7 @@ plt.figure()
 plt.plot(train_losses, label="Train Loss")
 plt.xlabel("Time")
 plt.ylabel("Loss")
+plt.ylim(bottom=0)
 plt.title("Training Loss")
 plt.legend()
 plt.grid(True)

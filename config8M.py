@@ -1,18 +1,16 @@
 from transformers import GPTNeoConfig, AutoTokenizer, models, PreTrainedTokenizerFast
-from utils import is_notebook
 
 # Loading tokenizer
 
-model_name = "abakirci/admbkrc-turkish-tokenizer"
-tokenizer_pth = "./models/tokenizers/" + model_name.rsplit("/", 1)[1]
+MODEL_NAME = "abakirci/admbkrc-turkish-tokenizer"
+tokenizer_pth = "./models/tokenizers/" + MODEL_NAME.rsplit("/", 1)[1]
 
 try:
     tokenizer = PreTrainedTokenizerFast(tokenizer_file=tokenizer_pth+"/tokenizer.json")
+    print("loaded tokenizer from disk 💽")
 except Exception as e:
-    print("Error:", e)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    if is_notebook()==False:
-        tokenizer.save_pretrained(tokenizer_pth)
+    print("heading to 🤗 to load tokenizer")
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 tokenizer.pad_token = tokenizer.eos_token
 # causes: tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -28,7 +26,6 @@ class TrainConfig:
     batch_size: int
     learning_rate: float
     val_freq: int
-    save_freq: int
     sample_size: int
     seed: int
     model_location: str
@@ -58,8 +55,7 @@ cfg = TrainConfig(
     batch_size=32,
     learning_rate=1e-3,
     val_freq=200,
-    save_freq=6000,
-    sample_size=30,
+    sample_size=30, # train loss is calculated by taking the last n train losses
     seed=64, # Needs to be the same pre&post checkpoint
     model_location="models/sml/8M"
 )
