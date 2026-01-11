@@ -1,5 +1,5 @@
 from model import CausalLM
-from config8M import cfg
+from configs.config import cfg
 import torch
 from dataloader import val_dataset
 from torch.utils.data import DataLoader

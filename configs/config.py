@@ -1,0 +1,1 @@
+from configs.custom_ds_8M import cfg

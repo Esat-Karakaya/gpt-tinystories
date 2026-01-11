@@ -1,4 +1,4 @@
-from config8M import cfg
+from configs.config import cfg
 from model import CausalLM
 import torch
 import matplotlib.pyplot as plt
