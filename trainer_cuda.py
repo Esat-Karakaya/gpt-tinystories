@@ -36,7 +36,7 @@ for epoch in range(cfg.epoch):
         
         if batch_cnt%cfg.val_freq==0:
             train_loss = log_state(
-                model=sml, cfg=cfg,
+                cfg=cfg,
                 train_loss_cache=train_batches_loss,
                 batch_cnt=batch_cnt
             )

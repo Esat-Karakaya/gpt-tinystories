@@ -33,7 +33,7 @@ class TrainConfig:
     ds_name: str
 
 modelcfg = GPTNeoConfig(
-    vocab_size=tokenizer.vocab_size,
+    vocab_size=len(tokenizer),
     max_position_embeddings=300,
     hidden_size=256,
     num_layers=8,
